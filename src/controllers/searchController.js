@@ -256,7 +256,7 @@ const SEARCH_REGISTRY = [
     displayField: "pt_task_id",
     subtitleField: "putaway_status",
     extraAttributes: ["putaway_status", "qty"],
-    route: "/putaway",
+    route: "/putaway/putawaydetails",
   },
   {
     key: "skus",
@@ -289,7 +289,8 @@ const SEARCH_REGISTRY = [
     displayField: "client_name",
     subtitleField: "client_code",
     extraAttributes: ["client_code", "email"],
-    route: "/master/clients",
+    route: "/master?tab=clients",
+    no_deeplink: true,
   },
   {
     key: "suppliers",
@@ -495,7 +496,9 @@ export const globalSearch = async (req, res, next) => {
             display: row[config.displayField],
             subtitle: row[config.subtitleField] || null,
             entityId: row[config.idField],
-            route: `${config.route}/${row.id}`, // deep link to the specific record
+            route: config.no_deeplink
+              ? config.route
+              : `${config.route}/${row.id}`, // deep link to the specific record
             type: config.key,
             meta: (config.extraAttributes || []).reduce((acc, attr) => {
               acc[attr] = row[attr];
