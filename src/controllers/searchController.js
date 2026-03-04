@@ -302,6 +302,7 @@ const SEARCH_REGISTRY = [
     subtitleField: "supplier_code",
     extraAttributes: ["supplier_code", "email"],
     route: "/masters?tab=suppliers",
+    no_deeplink: true,
   },
   {
     key: "locations",
@@ -313,6 +314,7 @@ const SEARCH_REGISTRY = [
     subtitleField: "zone",
     extraAttributes: ["zone", "location_type", "current_usage", "capacity"],
     route: "/masters?tab=locations-bins",
+    no_deeplink: true,
   },
   {
     key: "orders",
