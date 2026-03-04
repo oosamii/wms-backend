@@ -234,7 +234,7 @@ const SEARCH_REGISTRY = [
     displayField: "asn_no",
     subtitleField: "status",
     extraAttributes: ["eta", "status"],
-    route: "/inbound/asns",
+    route: "/inbound/ASNDetails",
   },
   {
     key: "grns",
