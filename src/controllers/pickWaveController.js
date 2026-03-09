@@ -523,10 +523,10 @@ const getWaveStats = async (req, res, next) => {
 
 const getWaveByOrderId = async (req, res, next) => {
   try {
-    const { order_id } = req.params;
+    const { orderId } = req.params;
 
     const waveOrder = await PickWaveOrder.findOne({
-      where: { order_id },
+      where: { order_id: orderId },
       include: [
         {
           model: PickWave,
