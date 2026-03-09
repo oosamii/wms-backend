@@ -13,13 +13,15 @@ const generatePalletID = async () => {
 // Get all pallets
 const getAllPallets = async (req, res, next) => {
   try {
-    const { warehouse_id, status } = req.query;
+    const { warehouse_id, status, page = 1, limit = 10 } = req.query;
 
     const whereClause = {};
     if (warehouse_id) whereClause.warehouse_id = warehouse_id;
     if (status) whereClause.status = status;
 
-    const pallets = await Pallet.findAll({
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const { count, rows: pallets } = await Pallet.findAndCountAll({
       where: whereClause,
       include: [
         {
@@ -29,11 +31,19 @@ const getAllPallets = async (req, res, next) => {
         },
       ],
       order: [["created_at", "DESC"]],
+      limit: parseInt(limit),
+      offset,
     });
 
     res.json({
       success: true,
       data: pallets,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / parseInt(limit)),
+      },
     });
   } catch (error) {
     next(error);
