@@ -7,6 +7,7 @@ import {
   releaseWave,
   cancelWave,
   getWaveStats,
+  getWaveByOrderId,
 } from "../controllers/pickWaveController.js";
 import { authenticate } from "../middleware/auth.js";
 
@@ -27,5 +28,6 @@ router.get("/:id", getWaveById);
 // Wave actions
 router.post("/:id/release", releaseWave);
 router.post("/:id/cancel", cancelWave);
+router.get("/order/:orderId/wave", getWaveByOrderId);
 
 export default router;

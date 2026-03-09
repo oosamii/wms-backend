@@ -521,6 +521,38 @@ const getWaveStats = async (req, res, next) => {
   }
 };
 
+const getWaveByOrderId = async (req, res, next) => {
+  try {
+    const { order_id } = req.params;
+
+    const waveOrder = await PickWaveOrder.findOne({
+      where: { order_id },
+      include: [
+        {
+          model: PickWave,
+          as: "wave",
+          include: [
+            {
+              model: SalesOrder,
+              as: "orders",
+              include: [{ model: SalesOrderLine, as: "lines" }],
+            },
+            { model: Warehouse, as: "warehouse" },
+          ],
+        },
+      ],
+    });
+
+    if (!waveOrder) {
+      return res.status(404).json({ error: "Wave not found for this order" });
+    }
+
+    res.json(waveOrder.wave);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   getEligibleOrders,
   createWave,
@@ -529,4 +561,5 @@ export {
   releaseWave,
   cancelWave,
   getWaveStats,
+  getWaveByOrderId,
 };
