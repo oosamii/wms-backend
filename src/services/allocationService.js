@@ -197,12 +197,13 @@ export async function allocateOrderLine(orderLine, order, transaction) {
       { transaction },
     );
 
-    // Update inventory
-    await inventory.update(
+    // Update inventory atomically — reserve stock
+    await Inventory.update(
       {
-        allocated_qty: parseFloat(inventory.allocated_qty) + qtyToAllocate,
+        allocated_qty: sequelize.literal(`allocated_qty + ${qtyToAllocate}`),
+        available_qty: sequelize.literal(`available_qty - ${qtyToAllocate}`),
       },
-      { transaction },
+      { where: { id: inventory.id }, transaction },
     );
 
     allocations.push(allocation);
@@ -261,13 +262,13 @@ export async function releaseAllocation(allocationId, reason, transaction) {
   // Calculate quantity to release (allocated but not yet consumed)
   const qtyToRelease = allocation.remaining_qty;
 
-  // Update inventory (restore allocated quantity)
-  await allocation.inventory.update(
+  // Update inventory atomically — restore reserved stock back to available
+  await Inventory.update(
     {
-      allocated_qty:
-        parseFloat(allocation.inventory.allocated_qty) - qtyToRelease,
+      allocated_qty: sequelize.literal(`allocated_qty - ${qtyToRelease}`),
+      available_qty: sequelize.literal(`available_qty + ${qtyToRelease}`),
     },
-    { transaction },
+    { where: { id: allocation.inventory_id }, transaction },
   );
 
   // Update allocation status

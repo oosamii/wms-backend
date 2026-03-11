@@ -446,13 +446,12 @@ const completePicking = async (req, res, next) => {
       );
     }
 
-    // 3. Update inventory
-    await task.inventory.update(
+    await Inventory.update(
       {
-        on_hand_qty: parseFloat(task.inventory.on_hand_qty) - qty_picked,
-        allocated_qty: parseFloat(task.inventory.allocated_qty) - qty_picked,
+        on_hand_qty: sequelize.literal(`on_hand_qty - ${qty_picked}`),
+        allocated_qty: sequelize.literal(`allocated_qty - ${qty_picked}`),
       },
-      { transaction },
+      { where: { id: task.inventory_id }, transaction },
     );
 
     // 4. Create inventory transaction
@@ -586,11 +585,12 @@ async function attemptReallocation(task, shortQty, transaction, userId) {
     { transaction },
   );
 
-  await inventory.update(
+  await Inventory.update(
     {
-      allocated_qty: parseFloat(inventory.allocated_qty) + qtyToReallocate,
+      allocated_qty: sequelize.literal(`allocated_qty + ${qtyToReallocate}`),
+      available_qty: sequelize.literal(`available_qty - ${qtyToReallocate}`),
     },
-    { transaction },
+    { where: { id: inventory.id }, transaction },
   );
 
   await task.orderLine.update(

@@ -196,12 +196,10 @@ const addItemToCarton = async (req, res, next) => {
 
     if (!orderLine) {
       await transaction.rollback();
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Sales order line not found for this order",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Sales order line not found for this order",
+      });
     }
 
     // Validate packed qty does not exceed picked qty
