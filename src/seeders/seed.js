@@ -19,7 +19,7 @@ const seedDatabase = async () => {
       { name: "Update", code: "UPDATE", description: "Edit existing records" },
       { name: "Delete", code: "DELETE", description: "Delete records" },
       { name: "Export", code: "EXPORT", description: "Export data" },
-    ]);
+    ], { ignoreDuplicates: true });
     console.log(`✅ Created ${permissions.length} permissions`);
 
     // 2. Create Modules
@@ -108,27 +108,136 @@ const seedDatabase = async () => {
         display_order: 11,
         icon: "putaway",
       },
-    ]);
+      {
+        name: "Picking",
+        code: "PICKING",
+        description: "",
+        display_order: 12,
+        icon: "",
+      },
+      {
+        name: "Packing",
+        code: "PACKING",
+        description: "",
+        display_order: 13,
+        icon: "",
+      },
+      {
+        name: "Billing",
+        code: "BILLING",
+        description: "",
+        display_order: 13,
+        icon: "",
+      },
+      {
+        name: "Masters",
+        code: "MASTERS",
+        description: "",
+        display_order: 14,
+        icon: "",
+      },
+      {
+        name: "Roles",
+        code: "ROLES",
+        description: "",
+        display_order: 15,
+        icon: "",
+      },
+      {
+        name: "Permissions",
+        code: "PERMISSIONS",
+        description: "",
+        display_order: 16,
+        icon: "",
+      },
+      {
+        name: "Modules",
+        code: "MODULES",
+        description: "",
+        display_order: 17,
+        icon: "",
+      },
+      {
+        name: "SKUs",
+        code: "SKUS",
+        description: "",
+        display_order: 18,
+        icon: "",
+      },
+      {
+        name: "Locations & Bins",
+        code: "LOCATIONS",
+        description: "",
+        display_order: 18,
+        icon: "",
+      },
+      {
+        name: "Clients",
+        code: "CLIENTS",
+        description: "",
+        display_order: 19,
+        icon: "",
+      },
+      {
+        name: "Slotting Rules",
+        code: "SLOTTINGRULES",
+        description: "",
+        display_order: 20,
+        icon: "",
+      },
+      {
+        name: "Docks",
+        code: "DOCKS",
+        description: "",
+        display_order: 21,
+        icon: "",
+      },
+      {
+        name: "OutBound",
+        code: "OUTBOUND",
+        description: "",
+        display_order: 22,
+        icon: "",
+      },
+      {
+        name: "Shipping",
+        code: "SHIPPING",
+        description: "",
+        display_order: 23,
+        icon: "",
+      },
+      {
+        name: "Carriers",
+        code: "CARRIERS",
+        description: "",
+        display_order: 24,
+        icon: "",
+      },
+      {
+        name: "Shippings",
+        code: "SHIPPINGS",
+        description: "All activities related to shipping",
+        display_order: 25,
+        icon: "shipping",
+      },
+    ], { ignoreDuplicates: true });
     console.log(`✅ Created ${modules.length} modules`);
 
     // 3. Create Roles
     console.log("Creating roles...");
-    const adminRole = await Role.create({
-      role_name: "Administrator",
-      role_code: "ADMIN",
-      description: "Full system access",
+    const [adminRole] = await Role.findOrCreate({
+      where: { role_code: "ADMIN" },
+      defaults: { role_name: "Administrator", description: "Full system access" },
     });
 
-    const managerRole = await Role.create({
-      role_name: "Warehouse Manager",
-      role_code: "MANAGER",
-      description: "Manage warehouse operations",
+    const [managerRole] = await Role.findOrCreate({
+      where: { role_code: "MANAGER" },
+      defaults: { role_name: "Warehouse Manager", description: "Manage warehouse operations" },
     });
 
-    const userRole = await Role.create({
-      role_name: "User",
-      role_code: "USER",
-      description: "Basic user access",
+    const [userRole] = await Role.findOrCreate({
+      where: { role_code: "USER" },
+      defaults: { role_name: "User", description: "Basic user access" },
     });
     console.log("✅ Created 3 roles");
 
@@ -137,11 +246,9 @@ const seedDatabase = async () => {
     let adminPermissions = 0;
     for (const module of modules) {
       for (const permission of permissions) {
-        await RoleModule.create({
-          role_id: adminRole.id,
-          module_id: module.id,
-          permission_id: permission.id,
-          is_granted: true,
+        await RoleModule.findOrCreate({
+          where: { role_id: adminRole.id, module_id: module.id, permission_id: permission.id },
+          defaults: { is_granted: true },
         });
         adminPermissions++;
       }
@@ -165,11 +272,9 @@ const seedDatabase = async () => {
       if (managerModules.includes(module.code)) {
         for (const permission of permissions) {
           if (managerPerms.includes(permission.code)) {
-            await RoleModule.create({
-              role_id: managerRole.id,
-              module_id: module.id,
-              permission_id: permission.id,
-              is_granted: true,
+            await RoleModule.findOrCreate({
+              where: { role_id: managerRole.id, module_id: module.id, permission_id: permission.id },
+              defaults: { is_granted: true },
             });
             managerPermissions++;
           }
@@ -188,11 +293,9 @@ const seedDatabase = async () => {
       if (userModules.includes(module.code)) {
         for (const permission of permissions) {
           if (userPerms.includes(permission.code)) {
-            await RoleModule.create({
-              role_id: userRole.id,
-              module_id: module.id,
-              permission_id: permission.id,
-              is_granted: true,
+            await RoleModule.findOrCreate({
+              where: { role_id: userRole.id, module_id: module.id, permission_id: permission.id },
+              defaults: { is_granted: true },
             });
             userPermissions++;
           }
@@ -203,19 +306,13 @@ const seedDatabase = async () => {
 
     // 7. Create Admin User
     console.log("Creating admin user...");
-    const adminUser = await User.create({
-      username: "admin",
-      email: "admin@wms.com",
-      pass_hash: "Admin@123",
-      first_name: "System",
-      last_name: "Administrator",
-      phone: "1234567890",
-      is_active: true,
+    const [adminUser] = await User.findOrCreate({
+      where: { email: "admin@wms.com" },
+      defaults: { username: "admin", pass_hash: "Admin@123", first_name: "System", last_name: "Administrator", phone: "1234567890", is_active: true },
     });
 
-    await UserRole.create({
-      user_id: adminUser.id,
-      role_id: adminRole.id,
+    await UserRole.findOrCreate({
+      where: { user_id: adminUser.id, role_id: adminRole.id },
     });
     console.log("✅ Created admin user");
     console.log("   Email: admin@wms.com");
@@ -223,19 +320,13 @@ const seedDatabase = async () => {
 
     // 8. Create a test manager user
     console.log("Creating manager user...");
-    const managerUser = await User.create({
-      username: "manager",
-      email: "manager@wms.com",
-      pass_hash: "Manager@123",
-      first_name: "Test",
-      last_name: "Manager",
-      phone: "9876543210",
-      is_active: true,
+    const [managerUser] = await User.findOrCreate({
+      where: { email: "manager@wms.com" },
+      defaults: { username: "manager", pass_hash: "Manager@123", first_name: "Test", last_name: "Manager", phone: "9876543210", is_active: true },
     });
 
-    await UserRole.create({
-      user_id: managerUser.id,
-      role_id: managerRole.id,
+    await UserRole.findOrCreate({
+      where: { user_id: managerUser.id, role_id: managerRole.id },
     });
     console.log("✅ Created manager user");
     console.log("   Email: manager@wms.com");
@@ -243,19 +334,13 @@ const seedDatabase = async () => {
 
     // 9. Create a test regular user
     console.log("Creating regular user...");
-    const regularUser = await User.create({
-      username: "user",
-      email: "user@wms.com",
-      pass_hash: "User@123",
-      first_name: "Test",
-      last_name: "User",
-      phone: "5555555555",
-      is_active: true,
+    const [regularUser] = await User.findOrCreate({
+      where: { email: "user@wms.com" },
+      defaults: { username: "user", pass_hash: "User@123", first_name: "Test", last_name: "User", phone: "5555555555", is_active: true },
     });
 
-    await UserRole.create({
-      user_id: regularUser.id,
-      role_id: userRole.id,
+    await UserRole.findOrCreate({
+      where: { user_id: regularUser.id, role_id: userRole.id },
     });
     console.log("✅ Created regular user");
     console.log("   Email: user@wms.com");
