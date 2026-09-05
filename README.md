@@ -753,3 +753,5 @@ Billable Events generated (inbound/outbound activity)
 | Rate Limiting | 500 requests / 15 minutes per IP on `/api/*` |
 | SQL Injection | Prevented by Sequelize parameterized queries |
 | Error Responses | Stack traces suppressed in production |
+
+<!-- Security scan triggered at 2026-09-05 07:28:59 -->
